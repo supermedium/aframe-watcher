@@ -16,7 +16,6 @@ app.get('/', (req, res) => {
 
 app.post('/save', (req, res) => {
   const changes = req.body;
-  console.log(changes);
 
   // Prompt to confirm.
   console.log([
@@ -32,7 +31,7 @@ app.post('/save', (req, res) => {
     if (!answer) { res.sendStatus(403); }
 
     // Accepted.
-    writeChanges(changes);
+    sync(changes);
     res.sendStatus(200);
   });
 });
@@ -49,42 +48,68 @@ function prettyPrintChanges (changes) {
   return output;
 }
 
-/**
- * Given changes, scan for IDs, and write to HTML files.
- */
-function writeChanges (changes) {
+function sync (changes) {
   files.forEach(file => {
-    let contents = fs.readFileSync(file, 'utf-8');
-    Object.keys(changes).forEach(id => {
-      // Scan for ID in file.
-      const regex = new RegExp(`<a-entity.*id=".*${id}.*".*</a-entity>`);
-      const match = regex.exec(contents);
-      if (!match) { return; }
-
-      const entityMatchIndex = match.index;
-      const entityString = match[0];
-
-      // Scan for components within entity.
-      Object.keys(changes[id]).forEach(attribute => {
-        // Check if component is defined already.
-        const attributeRegex = new RegExp(`${attribute}="(.*)"`);
-        const attributeMatch = attributeRegex.exec(entityString);
-
-        if (attributeMatch) {
-          // Single-property attribute match (e.g., position, rotation, scale).
-          if (attribute.indexOf('.') === -1) {
-            console.log(entityString);
-            console.log(entityString.replace(
-              new RegExp(`${attribute}="(.*)"`),
-              `${attribute}="${changes[id][attribute]}"`
-            ));
-          }
-        } else {
-          console.log('no match');
-        }
-      });
-    });
+    const contents = updateFile(fs.readFileSync(file, 'utf-8'), changes);
+    fs.writeFileSync(file, contents);
   });
+  console.log('Sync complete.');
+}
+
+/**
+ * Given changes, scan for IDs, and write to HTML file.
+ */
+function updateFile (content, changes) {
+  Object.keys(changes).forEach(id => {
+    // Scan for ID in file.
+    const regex = new RegExp(`<a-entity.*?id=".*?${id}.*?".*?</a-entity>`);
+    const match = regex.exec(content);
+    if (!match) { return; }
+
+    const entityMatchIndex = match.index;
+    const originalEntityString = match[0];
+    let entityString = match[0];
+
+    // Scan for components within entity.
+    Object.keys(changes[id]).forEach(attribute => {
+      // Check if component is defined already.
+      const attributeRegex = new RegExp(`${attribute}="(.*?)"`);
+      const attributeMatch = attributeRegex.exec(entityString);
+      const value = changes[id][attribute];
+
+      if (attribute.indexOf('.') === -1) {
+        // Single-property attribute match (e.g., position, rotation, scale).
+        if (attributeMatch) {
+          // Modify.
+          entityString = entityString.replace(
+            new RegExp(`${attribute}="(.*)"`),
+            `${attribute}="${value}"`
+          );
+        } else {
+          // Add.
+          entityString = entityString.replace(
+            new RegExp(`id="${id}"`),
+            `id="${id}" ${attribute}="${value}"`
+          );
+        }
+      } else {
+        // Multi-property attribute match (e.g., material).
+        if (attributeMatch) {
+          // TODO: Modify.
+        } else {
+          // TODO: Add.
+        }
+      }
+    });
+
+    // Splice in updated entity string into file content.
+    content = content.substring(0, entityMatchIndex) +
+              entityString +
+              content.substring(entityMatchIndex + originalEntityString.length,
+                                content.length);
+  });
+
+  return content;
 }
 
 /**
@@ -110,7 +135,7 @@ function getWorkingFiles () {
 
 const PORT = process.env.PORT || 51234;
 app.listen(PORT, () => {
-  console.log(`aframe-watcher listening on localhost:${PORT}.`);
+  console.log(`Watching for messages from Inspector on localhost:${PORT}.`);
 });
 
 const files = getWorkingFiles();

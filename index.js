@@ -100,12 +100,20 @@ function updateFile (file, content, changes) {
           );
         }
       } else {
-        // Multi-property attribute match (e.g., material).
-        if (attributeMatch) {
-          // TODO: Modify.
-        } else {
-          // TODO: Add.
-        }
+        Object.keys(value).forEach(property => {
+          // Multi-property attribute match (e.g., material).
+          if (attributeMatch) {
+            // TODO: Modify attribute.
+            const propertyRegex = new RegExp(`${property}:(.*?)[";]`);
+            if (propertyMatch) {
+              // TODO: Modify property.
+            } else {
+              // TODO: Add property.
+            }
+          } else {
+            // TODO: Add attribute.
+          }
+      });
       }
 
       console.log(`Updated ${attribute} of #${id} in ${file}.`);
@@ -120,6 +128,7 @@ function updateFile (file, content, changes) {
 
   return content;
 }
+module.exports.updateFile = updateFile;
 
 /**
  * What files to edit, can be passed in as glob string.
@@ -142,10 +151,12 @@ function getWorkingFiles () {
   return glob.sync(globString || '**/*.html');
 }
 
-const PORT = process.env.PORT || 51234;
-app.listen(PORT, () => {
-  console.log(`Watching for messages from Inspector on localhost:${PORT}.`);
-});
+if (!process.env.NODE_ENV === 'test') {
+  const PORT = process.env.PORT || 51234;
+  app.listen(PORT, () => {
+    console.log(`Watching for messages from Inspector on localhost:${PORT}.`);
+  });
 
-const files = getWorkingFiles();
-console.log('Found HTML files:', files);
+  const files = getWorkingFiles();
+  console.log('Found HTML files:', files);
+}

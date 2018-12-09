@@ -1,6 +1,6 @@
 {
   "name": "aframe-watcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A companion watch server to receive and save changes coming from the A-Frame Inspector.",
   "main": "index.js",
   "scripts": {
@@ -33,5 +33,8 @@
     "nodemon": "^1.18.7",
     "prompt": "^1.0.0",
     "prompt-confirm": "^2.0.4"
+  },
+  "bin": {
+    "aframe-watcher": "./index.js"
   }
 }

@@ -98,4 +98,40 @@ describe('sync', () => {
       <a-entity id="bar" rotation="2 3 4"></a-entity>
     `);
   });
+
+  it('ignores component that contains changed component name', () => {
+    const template = `<a-entity id="foo" foobar="0 0 0" foo="1 2 3"></a-entity>`;
+    const res = updateFile('foo.html', template, {
+      foo: {foo: '2 3 4'}
+    });
+    assert.equal(res, '<a-entity id="foo" foobar="0 0 0" foo="2 3 4"></a-entity>');
+  });
+
+  it('ignores property that contains changed property name', () => {
+    const template = `<a-entity id="foo" bar="quxqux: 1 2 3; qux: 1 2 3"></a-entity>`;
+    const res = updateFile('foo.html', template, {
+      foo: {
+        bar: {
+          qux: '2 3 4'
+        }
+      }
+    });
+    assert.equal(res, '<a-entity id="foo" bar="quxqux: 1 2 3; qux: 2 3 4"></a-entity>');
+  });
+
+  it('ignores attributes ending in id', () => {
+    const template = `
+      <a-entity data-id="foo"></a-entity>
+      <a-entity id="foo"></a-entity>
+    `;
+    const res = updateFile('foo.html', template, {
+      foo: {
+        position: '1 2 3'
+      }
+    });
+    assert.equal(res, `
+      <a-entity data-id="foo"></a-entity>
+      <a-entity id="foo" position="1 2 3"></a-entity>
+    `);
+  });
 });

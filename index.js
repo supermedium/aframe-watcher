@@ -72,16 +72,19 @@ function sync (changes) {
 function updateFile (file, content, changes) {
   // Matches any character including line breaks.
   const filler = '([^]*?)';
+  const whitespace = '[\\s\\n]';
+  const propertyDelimit = '["\\s;\]';
 
   Object.keys(changes).forEach(id => {
     // Scan for ID in file.
-    const regex = new RegExp(`<a-entity${filler}id="${id}"${filler}>`);
+    const regex = new RegExp(`<a-entity${filler}(${whitespace})id="${id}"${filler}>`);
     const match = regex.exec(content);
     if (!match) { return; }
 
     // Post-process regex to get only last occurence.
     const split = match[0].split('<a-entity');
     const lastMatch = '<a-entity' + split[split.length - 1]
+    const idWhitespaceMatch = match[2];
 
     const entityMatchIndex = content.indexOf(lastMatch);
     const originalEntityString = lastMatch;
@@ -90,23 +93,24 @@ function updateFile (file, content, changes) {
     // Scan for components within entity.
     Object.keys(changes[id]).forEach(attribute => {
       // Check if component is defined already.
-      const attributeRegex = new RegExp(`${attribute}="(.*?)(;?)"`);
+      const attributeRegex = new RegExp(`(${whitespace})${attribute}="(.*?)(;?)"`);
       const attributeMatch = attributeRegex.exec(entityString);
       const value = changes[id][attribute];
 
       if (typeof value === 'string') {
         // Single-property attribute match (e.g., position, rotation, scale).
         if (attributeMatch) {
+          const whitespaceMatch = attributeMatch[1];
           // Modify.
           entityString = entityString.replace(
-            new RegExp(`${attribute}=".*?"`),
-            `${attribute}="${value}"`
+            new RegExp(`${whitespaceMatch}${attribute}=".*?"`),
+            `${whitespaceMatch}${attribute}="${value}"`
           );
         } else {
           // Add.
           entityString = entityString.replace(
-            new RegExp(`id="${id}"`),
-            `id="${id}" ${attribute}="${value}"`
+            new RegExp(`${idWhitespaceMatch}id="${id}"`),
+            `${idWhitespaceMatch}id="${id}" ${attribute}="${value}"`
           );
         }
       } else {
@@ -118,19 +122,23 @@ function updateFile (file, content, changes) {
           if (attributeMatch) {
             // Modify attribute.
             let attributeString = attributeMatch[0];
-            const propertyRegex = new RegExp(`${property}:(.*?)([";])`);
+            const whitespaceMatch = attributeMatch[1];
+            const propertyRegex = new RegExp(`(${propertyDelimit})${property}:(.*?)([";])`);
             propertyMatch = propertyRegex.exec(attributeMatch);
+
             if (propertyMatch) {
               // Modify property.
+              const propertyDelimitMatch = propertyMatch[1];
               attributeString = attributeString.replace(
-                new RegExp(`${property}:(.*?)([";])`),
-                `${property}: ${propertyValue}${propertyMatch[2]}`
+                new RegExp(`${propertyDelimitMatch}${property}:(.*?)([";])`),
+                `${propertyDelimitMatch}${property}: ${propertyValue}${propertyMatch[3]}`
               );
             } else {
               // Add property to existing.
+              console.log(attributeMatch);
               attributeString = attributeString.replace(
-                new RegExp(`${attribute}="(.*?)(;?)"`),
-                `${attribute}="${attributeMatch[1]}${attributeMatch[2]}; ${property}: ${propertyValue}"`
+                new RegExp(`${whitespaceMatch}${attribute}="(.*?)(;?)"`),
+                `${whitespaceMatch}${attribute}="${attributeMatch[2]}${attributeMatch[3]}; ${property}: ${propertyValue}"`
               );
             }
 
@@ -139,8 +147,8 @@ function updateFile (file, content, changes) {
           } else {
             // Add component entirely.
             entityString = entityString.replace(
-              new RegExp(`id="${id}"`),
-              `id="${id}" ${attribute}="${property}: ${propertyValue}"`
+              new RegExp(`${idWhitespaceMatch}id="${id}"`),
+              `${idWhitespaceMatch}id="${id}" ${attribute}="${property}: ${propertyValue}"`
             );
           }
         });

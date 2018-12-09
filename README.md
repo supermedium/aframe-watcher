@@ -16,8 +16,14 @@ Then specify HTML files to watch in your project:
 aframe-watcher *.html
 ```
 
-Open the Inspector (currently master or 0.9.0 version of Inspector). Make
-changes and hit save:
+Open the Inspector on an A-Frame scene with `ctrl + alt + i` (currently master or
+0.9.0 version of Inspector):
+
+```html
+<a-scene inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js'>
+```
+
+Make changes and hit save:
 
 ![](https://user-images.githubusercontent.com/674727/49696477-fa525f00-fb5e-11e8-92e9-be0c9461f4ac.png)
 

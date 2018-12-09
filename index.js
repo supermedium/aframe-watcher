@@ -80,11 +80,11 @@ function updateFile (file, content, changes) {
     // Scan for components within entity.
     Object.keys(changes[id]).forEach(attribute => {
       // Check if component is defined already.
-      const attributeRegex = new RegExp(`${attribute}=".*?"`);
+      const attributeRegex = new RegExp(`${attribute}="(.*?)(;?)"`);
       const attributeMatch = attributeRegex.exec(entityString);
       const value = changes[id][attribute];
 
-      if (attribute.indexOf('.') === -1) {
+      if (typeof value === 'string') {
         // Single-property attribute match (e.g., position, rotation, scale).
         if (attributeMatch) {
           // Modify.
@@ -100,20 +100,40 @@ function updateFile (file, content, changes) {
           );
         }
       } else {
+        // Multi-property attribute match (e.g., material).
         Object.keys(value).forEach(property => {
-          // Multi-property attribute match (e.g., material).
+          const attributeMatch = attributeRegex.exec(entityString);
+          const propertyValue = value[property];
+
           if (attributeMatch) {
-            // TODO: Modify attribute.
-            const propertyRegex = new RegExp(`${property}:(.*?)[";]`);
+            // Modify attribute.
+            let attributeString = attributeMatch[0];
+            const propertyRegex = new RegExp(`${property}:(.*?)([";])`);
+            propertyMatch = propertyRegex.exec(attributeMatch);
             if (propertyMatch) {
-              // TODO: Modify property.
+              // Modify property.
+              attributeString = attributeString.replace(
+                new RegExp(`${property}:(.*?)([";])`),
+                `${property}: ${propertyValue}${propertyMatch[2]}`
+              );
             } else {
-              // TODO: Add property.
+              // Add property to existing.
+              attributeString = attributeString.replace(
+                new RegExp(`${attribute}="(.*?)(;?)"`),
+                `${attribute}="${attributeMatch[1]}${attributeMatch[2]}; ${property}: ${propertyValue}"`
+              );
             }
+
+            // Update entity string with updated component.
+            entityString = entityString.replace(attributeMatch[0], attributeString);
           } else {
-            // TODO: Add attribute.
+            // Add component entirely.
+            entityString = entityString.replace(
+              new RegExp(`id="${id}"`),
+              `id="${id}" ${attribute}="${property}: ${propertyValue}"`
+            );
           }
-      });
+        });
       }
 
       console.log(`Updated ${attribute} of #${id} in ${file}.`);

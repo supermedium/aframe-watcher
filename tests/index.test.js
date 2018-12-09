@@ -18,6 +18,26 @@ describe('sync', () => {
     assert.equal(res, '<a-entity id="foo" position="2 3 4"></a-entity>');
   });
 
+  it('syncs multi-prop update property', () => {
+    const template = '<a-entity id="foo" bar="a: 1; b: 2; c: 3"></a-entity>';
+    const res = updateFile('foo.html', template, {
+      foo: {
+        bar: {a: 4}
+      }
+    });
+    assert.equal(res, '<a-entity id="foo" bar="a: 4; b: 2; c: 3"></a-entity>');
+  });
+
+  it('syncs multi-prop add', () => {
+    const template = '<a-entity id="foo"></a-entity>';
+    const res = updateFile('foo.html', template, {
+      foo: {
+        bar: {a: 1, b: 2, c: 3}
+      }
+    });
+    assert.equal(res, '<a-entity id="foo" bar="a: 1; b: 2; c: 3"></a-entity>');
+  });
+
   it('syncs update with line break', () => {
     const template = `<a-entity\nid="foo"\nposition="1 2 3"\n>\n</a-entity>`;
     const res = updateFile('foo.html', template, {

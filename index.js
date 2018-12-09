@@ -50,7 +50,7 @@ function prettyPrintChanges (changes) {
 
 function sync (changes) {
   files.forEach(file => {
-    const contents = updateFile(fs.readFileSync(file, 'utf-8'), changes);
+    const contents = updateFile(file, fs.readFileSync(file, 'utf-8'), changes);
     fs.writeFileSync(file, contents);
   });
   console.log('Sync complete.');
@@ -59,21 +59,28 @@ function sync (changes) {
 /**
  * Given changes, scan for IDs, and write to HTML file.
  */
-function updateFile (content, changes) {
+function updateFile (file, content, changes) {
+  // Matches any character including line breaks.
+  const filler = '([^]*?)';
+
   Object.keys(changes).forEach(id => {
     // Scan for ID in file.
-    const regex = new RegExp(`<a-entity.*?id=".*?${id}.*?".*?</a-entity>`);
+    const regex = new RegExp(`<a-entity${filler}id="${id}"${filler}>`);
     const match = regex.exec(content);
     if (!match) { return; }
 
-    const entityMatchIndex = match.index;
-    const originalEntityString = match[0];
-    let entityString = match[0];
+    // Post-process regex to get only last occurence.
+    const split = match[0].split('<a-entity');
+    const lastMatch = '<a-entity' + split[split.length - 1]
+
+    const entityMatchIndex = content.indexOf(lastMatch);
+    const originalEntityString = lastMatch;
+    let entityString = lastMatch;
 
     // Scan for components within entity.
     Object.keys(changes[id]).forEach(attribute => {
       // Check if component is defined already.
-      const attributeRegex = new RegExp(`${attribute}="(.*?)"`);
+      const attributeRegex = new RegExp(`${attribute}=".*?"`);
       const attributeMatch = attributeRegex.exec(entityString);
       const value = changes[id][attribute];
 
@@ -82,7 +89,7 @@ function updateFile (content, changes) {
         if (attributeMatch) {
           // Modify.
           entityString = entityString.replace(
-            new RegExp(`${attribute}="(.*)"`),
+            new RegExp(`${attribute}=".*?"`),
             `${attribute}="${value}"`
           );
         } else {
@@ -100,6 +107,8 @@ function updateFile (content, changes) {
           // TODO: Add.
         }
       }
+
+      console.log(`Updated ${attribute} of #${id} in ${file}.`);
     });
 
     // Splice in updated entity string into file content.

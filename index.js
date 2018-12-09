@@ -5,6 +5,8 @@ const express = require('express');
 const fs = require('fs');
 const glob = require('glob');
 
+let files;
+
 const app = express()
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -41,7 +43,14 @@ function prettyPrintChanges (changes) {
   Object.keys(changes).forEach(id => {
     output += `#${id}:\n`;
     Object.keys(changes[id]).forEach(component => {
-      output += `  ${component}: ${JSON.stringify(changes[id][component])}`;
+      if (typeof changes[id][component] === 'object') {
+        output += `  ${component}:\n`;
+        Object.keys(changes[id][component]).forEach(property => {
+          output += `    ${property}: ${changes[id][component][property]}\n`;
+        });
+      } else {
+        output += `  ${component}: ${JSON.stringify(changes[id][component])}\n`;
+      }
     });
     output += '\n';
   });
@@ -171,12 +180,12 @@ function getWorkingFiles () {
   return glob.sync(globString || '**/*.html');
 }
 
-if (!process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 51234;
   app.listen(PORT, () => {
     console.log(`Watching for messages from Inspector on localhost:${PORT}.`);
   });
 
-  const files = getWorkingFiles();
+  files = getWorkingFiles();
   console.log('Found HTML files:', files);
 }

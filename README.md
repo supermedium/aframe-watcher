@@ -1,6 +1,8 @@
 ## aframe-watcher
 
-Companion server to o A-Frame Inspector to sync changes back to HTML files.
+Companion server to the A-Frame Inspector to sync changes back to HTML files.
+
+Are you tired of switching back and forth between your text editor, the Inspector, and refreshing? Now you can save your changes from the Inspector directly to your HTML files. The Inspector has built-in support with a save button for the Watcher. Just make sure your entities have defined IDs.
 
 ### Usage
 

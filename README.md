@@ -10,10 +10,16 @@ Install via npm:
 npm install -g aframe-watcher
 ```
 
-Then specify HTML files to watch in your project:
+Then launch aframe-watcher in your project directory containing HTML files.
 
 ```
-aframe-watcher *.html
+aframe-watcher
+```
+
+You can also specify which HTML files to watch.
+
+```
+aframe-watcher foo.html templates/*.html
 ```
 
 Open the Inspector on an A-Frame scene with `ctrl + alt + i` (currently master or

@@ -1,0 +1,25 @@
+<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+<script src="https://unpkg.com/aframe-supercraft-loader@3.0.0/dist/aframe-supercraft-loader.min.js"></script>
+<script src="https://unpkg.com/aframe-supercraft-thing@1.1.0/dist/aframe-supercraft-thing.min.js"></script>
+
+<a-scene inspector="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
+  <a-assets>
+    <a-asset-item id="snowman" src="snowman.json"></a-asset-item>
+  </a-assets>
+
+  <a-entity id="scene" supercraft-loader="src: #snowman"></a-entity>
+
+  <a-entity id="ground" supercraft-thing="from: #scene; name: thing0"></a-entity>
+  <a-entity id="feet" supercraft-thing="from: #scene; name: thing1"></a-entity>
+  <a-entity id="body" supercraft-thing="from: #scene; name: thing2"></a-entity>
+  <a-entity id="head" supercraft-thing="from: #scene; name: thing3"></a-entity>
+  <a-entity id="tree1" supercraft-thing="from: #scene; name: thing4"></a-entity>
+  <a-entity id="tree2" supercraft-thing="from: #scene; name: thing5"></a-entity>
+  <a-entity id="tree3" supercraft-thing="from: #scene; name: thing6"></a-entity>
+  <a-entity id="tree4" supercraft-thing="from: #scene; name: thing7"></a-entity>
+  <a-entity id="tree5" supercraft-thing="from: #scene; name: thing8"></a-entity>
+  <a-entity id="rock1" supercraft-thing="from: #scene; name: thing10"></a-entity>
+  <a-entity id="rock2" supercraft-thing="from: #scene; name: thing11"></a-entity>
+  <a-entity id="rock3" supercraft-thing="from: #scene; name: thing12"></a-entity>
+  <a-entity id="rock4" supercraft-thing="from: #scene; name: thing13"></a-entity>
+</a-scene>

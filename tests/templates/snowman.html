@@ -1,20 +1,20 @@
 <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
 <script src="https://unpkg.com/aframe-supercraft-loader@3.0.0/dist/aframe-supercraft-loader.min.js"></script>
-<script src="https://unpkg.com/aframe-supercraft-thing@1.1.0/dist/aframe-supercraft-thing.min.js"></script>
+<script src="supercraft-thing.js"></script>
 
-<a-scene inspector="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
+<a-scene inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
   <a-assets>
     <a-asset-item id="snowman" src="snowman.json"></a-asset-item>
   </a-assets>
 
-  <a-entity id="scene" supercraft-loader="src: #snowman"></a-entity>
+  <a-entity id="scene" supercraft-loader="src: #snowman" visible="false"></a-entity>
 
   <a-entity id="ground" supercraft-thing="from: #scene; name: thing0"></a-entity>
   <a-entity id="feet" supercraft-thing="from: #scene; name: thing1"></a-entity>
-  <a-entity id="body" supercraft-thing="from: #scene; name: thing2"></a-entity>
-  <a-entity id="head" supercraft-thing="from: #scene; name: thing3"></a-entity>
-  <a-entity id="tree1" supercraft-thing="from: #scene; name: thing4"></a-entity>
-  <a-entity id="tree2" supercraft-thing="from: #scene; name: thing5"></a-entity>
+  <a-entity id="body" position="0.7618634536991434 1.1859660072363845 -1.948" supercraft-thing="from: #scene; name: thing2; ignorePosition: true"></a-entity>
+  <a-entity id="head" rotation="0 -22.964709787479418 0" position="0.7766099911545954 1.7732413257213793 -1.9894041619164526" supercraft-thing="from: #scene; name: thing3; ignorePosition: true"></a-entity>
+  <a-entity id="tree1" position="-3.152872812091408 3.4839533792689217 -4.453939585785934" supercraft-thing="from: #scene; name: thing4; ignorePosition: true"></a-entity>
+  <a-entity id="tree2" position="4.585430261030163 4.737491709604238 -1.3285893862628284" supercraft-thing="from: #scene; name: thing5; ignorePosition: true"></a-entity>
   <a-entity id="tree3" supercraft-thing="from: #scene; name: thing6"></a-entity>
   <a-entity id="tree4" supercraft-thing="from: #scene; name: thing7"></a-entity>
   <a-entity id="tree5" supercraft-thing="from: #scene; name: thing8"></a-entity>

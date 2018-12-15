@@ -135,7 +135,6 @@ function updateFile (file, content, changes) {
               );
             } else {
               // Add property to existing.
-              console.log(attributeMatch);
               attributeString = attributeString.replace(
                 new RegExp(`${whitespaceMatch}${attribute}="(.*?)(;?)"`),
                 `${whitespaceMatch}${attribute}="${attributeMatch[2]}${attributeMatch[3]}; ${property}: ${propertyValue}"`

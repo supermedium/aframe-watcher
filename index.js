@@ -171,21 +171,24 @@ module.exports.updateFile = updateFile;
  * What files to edit, can be passed in as glob string.
  */
 function getWorkingFiles () {
-  let globString = '';
+  let files = [];
+
+  if (process.argv.length <= 2) {
+    return glob.sync('**/*.html');
+  }
+
   process.argv.forEach(function (val, index, array) {
     if (index < 2) { return; }
-    if (!globString) {
-      globString += `{${val}`;
-    } else {
-      globString += `${val}`;
+
+    if (fs.lstatSync(val).isDirectory()) {
+      if (!val.endsWith('/')) { val += '/'; }
+      val += '**/*.html';
     }
 
-    if (index !== process.argv.length - 1) { globString += ','; }
+    files = files.concat(glob.sync(val));
   });
-  if (globString) { globString += '}'; }
 
-  console.log(globString);
-  return glob.sync(globString || '**/*.html');
+  return files;
 }
 
 if (process.env.NODE_ENV !== 'test') {
@@ -196,4 +199,9 @@ if (process.env.NODE_ENV !== 'test') {
 
   files = getWorkingFiles();
   console.log('Found HTML files:', files);
+  if (!files.length) {
+    throw new Error(
+      'No HTML files found. ' +
+      'Try passing a directory or wildcard pointing to HTML files (e.g., **/*.html).');
+  }
 }

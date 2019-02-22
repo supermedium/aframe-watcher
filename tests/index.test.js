@@ -134,4 +134,12 @@ describe('sync', () => {
       <a-entity id="foo" position="1 2 3"></a-entity>
     `);
   });
+
+  it('syncs primitive', () => {
+    const template = `<a-box id="foo" position="1 2 3"></a-box>`;
+    const res = updateFile('foo.html', template, {
+      foo: {position: '2 3 4'}
+    });
+    assert.equal(res, '<a-box id="foo" position="2 3 4"></a-box>');
+  });
 });

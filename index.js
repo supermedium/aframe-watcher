@@ -71,20 +71,22 @@ function sync (changes) {
  */
 function updateFile (file, content, changes) {
   // Matches any character including line breaks.
+  const element = '(<a-[\\w]+)';
   const filler = '([^]*?)';
   const whitespace = '[\\s\\n]';
   const propertyDelimit = '["\\s;\]';
 
   Object.keys(changes).forEach(id => {
     // Scan for ID in file.
-    const regex = new RegExp(`<a-entity${filler}(${whitespace})id="${id}"${filler}>`);
+    const regex = new RegExp(`${element}${filler}(${whitespace})id="${id}"${filler}>`);
     const match = regex.exec(content);
     if (!match) { return; }
 
     // Post-process regex to get only last occurence.
-    const split = match[0].split('<a-entity');
-    const lastMatch = '<a-entity' + split[split.length - 1]
-    const idWhitespaceMatch = match[2];
+    const openingTag = match[1];
+    const split = match[0].split(openingTag);
+    const lastMatch = openingTag + split[split.length - 1]
+    const idWhitespaceMatch = match[3];
 
     const entityMatchIndex = content.indexOf(lastMatch);
     const originalEntityString = lastMatch;

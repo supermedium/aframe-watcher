@@ -142,4 +142,24 @@ describe('sync', () => {
     });
     assert.equal(res, '<a-box id="foo" position="2 3 4"></a-box>');
   });
+
+  it('with parent', () => {
+    const template = `
+      <a-entity position="0 0 0">
+        <a-image></a-image>
+        <a-image id="foo" position="1 2 3"></a-image>
+        <a-image></a-image>
+      </a-entity>
+    `;
+    const res = updateFile('foo.html', template, {
+      foo: {position: '2 3 4'}
+    });
+    assert.equal(res, `
+      <a-entity position="0 0 0">
+        <a-image></a-image>
+        <a-image id="foo" position="2 3 4"></a-image>
+        <a-image></a-image>
+      </a-entity>
+    `);
+  });
 });

@@ -82,15 +82,13 @@ function updateFile (file, content, changes) {
     const match = regex.exec(content);
     if (!match) { return; }
 
-    // Post-process regex to get only last occurence.
-    const openingTag = match[1];
-    const split = match[0].split(openingTag);
-    const lastMatch = openingTag + split[split.length - 1]
-    const idWhitespaceMatch = match[3];
+    // Might match unwanted parent entities, filter out.
+    const entitySplit = match[0].split('<a-');
+    let entityString = '<a-' + entitySplit[entitySplit.length - 1];
+    const originalEntityString = entityString;
 
-    const entityMatchIndex = content.indexOf(lastMatch);
-    const originalEntityString = lastMatch;
-    let entityString = lastMatch;
+    // Post-process regex to get only last occurence.
+    const idWhitespaceMatch = match[3];
 
     // Scan for components within entity.
     Object.keys(changes[id]).forEach(attribute => {
@@ -159,10 +157,7 @@ function updateFile (file, content, changes) {
     });
 
     // Splice in updated entity string into file content.
-    content = content.substring(0, entityMatchIndex) +
-              entityString +
-              content.substring(entityMatchIndex + originalEntityString.length,
-                                content.length);
+    content = content.replace(originalEntityString, entityString);
   });
 
   return content;

@@ -28,7 +28,7 @@ Open the Inspector on an A-Frame scene with `ctrl + alt + i` (currently master o
 0.9.0 version of Inspector):
 
 ```html
-<a-scene inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js'>
+<a-scene inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
 ```
 
 Make changes and hit save:

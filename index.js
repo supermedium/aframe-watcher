@@ -52,6 +52,9 @@ function prettyPrintChanges (changes) {
       } else {
         output += `  ${component}: ${JSON.stringify(changes[id][component])}\n`;
       }
+      if( id === null || id === '') {
+          output += `Warning: This entity does not have a defined ID and will not be updated!\n`;
+      }
     });
     output += '\n';
   });

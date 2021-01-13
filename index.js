@@ -7,6 +7,7 @@ const fs = require('fs');
 const glob = require('glob');
 
 let files;
+let confirmall = false;
 
 const app = express()
 app.use(cors());
@@ -20,23 +21,31 @@ app.get('/', (req, res) => {
 app.post('/save', (req, res) => {
   const changes = req.body;
 
-  // Prompt to confirm.
-  console.log([
-    `\nA-Frame Inspector from ${req.hostname} has requested the following changes:\n`,
-    `${prettyPrintChanges(changes)}`,
-    'Do you allow the A-Frame Inspector Watcher to write these updates directly ' +
-    'within this directory?'
-  ].join('\n'));
+  if (confirmall) {
+     sync(changes);
+     console.log('The following changes have been made:');
+     console.log(`${prettyPrintChanges(changes)}`);
+     res.sendStatus(200);
+  } else {
 
-  const prompt = new Confirm('Y/n');
-  prompt.run().then(answer => {
-    // Denied.
-    if (!answer) { res.sendStatus(403); }
+    // Prompt to confirm.
+    console.log([
+      `\nA-Frame Inspector from ${req.hostname} has requested the following changes:\n`,
+      `${prettyPrintChanges(changes)}`,
+      'Do you allow the A-Frame Inspector Watcher to write these updates directly ' +
+      'within this directory?'
+    ].join('\n'));
 
-    // Accepted.
-    sync(changes);
-    res.sendStatus(200);
-  });
+    const prompt = new Confirm('Y/n');
+    prompt.run().then(answer => {
+      // Denied.
+      if (!answer) { res.sendStatus(403); }
+
+      // Accepted.
+      sync(changes);
+      res.sendStatus(200);
+    });
+  }
 });
 
 function prettyPrintChanges (changes) {
@@ -176,6 +185,12 @@ function getWorkingFiles () {
 
   process.argv.forEach(function (val, index, array) {
     if (index < 2) { return; }
+
+    if (val === '-confirmall') {
+        console.log('-confirmall flag added; user will NOT be prompted on file saves from AFrame Inspector.');
+        confirmall = true;
+        return;
+    }
 
     if (fs.lstatSync(val).isDirectory()) {
       if (!val.endsWith('/')) { val += '/'; }

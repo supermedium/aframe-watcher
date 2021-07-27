@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 const bodyParser = require('body-parser');
-const Confirm = require('prompt-confirm');
+const { Confirm } = require('enquirer');
 const cors = require('cors');
 const express = require('express');
 const fs = require('fs');
 const glob = require('glob');
 
 let files;
+
+let shuttingDown = false;
+let writing = false;
 
 const app = express()
 app.use(cors());
@@ -20,23 +23,38 @@ app.get('/', (req, res) => {
 app.post('/save', (req, res) => {
   const changes = req.body;
 
-  // Prompt to confirm.
-  console.log([
-    `\nA-Frame Inspector from ${req.hostname} has requested the following changes:\n`,
-    `${prettyPrintChanges(changes)}`,
-    'Do you allow the A-Frame Inspector Watcher to write these updates directly ' +
-    'within this directory?'
-  ].join('\n'));
+  if (!shuttingDown)
+  {
+    // Prompt to confirm.
+    const msg = [
+      `\nA-Frame Inspector from ${req.hostname} has requested the following changes:\n`,
+      `${prettyPrintChanges(changes)}`,
+      'Do you allow the A-Frame Inspector Watcher to write these updates directly ' +
+      'within this directory?'
+    ].join('\n');
 
-  const prompt = new Confirm('Y/n');
-  prompt.run().then(answer => {
-    // Denied.
-    if (!answer) { res.sendStatus(403); }
+    const prompt = new Confirm({
+      type: 'confirm',
+      message: msg
+    });
+    prompt.run().then(answer => {
+      // Denied.
+      if (!answer) { res.sendStatus(403); }
 
-    // Accepted.
-    sync(changes);
-    res.sendStatus(200);
-  });
+      // Accepted.
+      writing = true;
+      sync(changes);
+      res.sendStatus(200);
+      writing = false;
+    });
+  }
+  else
+  {
+    //Shutting down, no writing allowed
+    res.sendStatus(403);
+  }
+
+  
 });
 
 function prettyPrintChanges (changes) {
@@ -202,3 +220,20 @@ if (process.env.NODE_ENV !== 'test') {
       'Try passing a directory or wildcard pointing to HTML files (e.g., **/*.html).');
   }
 }
+
+process.on('SIGINT', function() {
+  console.log("\nGracefully shutting down from SIGINT (Ctrl+C)");
+
+  //Prevents
+  shuttingDown = true;
+
+  //Add whatever needs to be taken care of before shutdown
+
+  if (writing)
+  {
+    console.log("Warning, shutdown occured during writing. Affected files could have been mangled!")
+  }
+
+  console.log("Exiting...");
+  process.exit();
+});

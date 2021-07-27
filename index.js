@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const bodyParser = require('body-parser');
-const Confirm = require('prompt-confirm');
+const { Confirm } = require('enquirer');
 const cors = require('cors');
 const express = require('express');
 const fs = require('fs');
@@ -26,14 +26,17 @@ app.post('/save', (req, res) => {
   if (!shuttingDown)
   {
     // Prompt to confirm.
-    console.log([
+    const msg = [
       `\nA-Frame Inspector from ${req.hostname} has requested the following changes:\n`,
       `${prettyPrintChanges(changes)}`,
       'Do you allow the A-Frame Inspector Watcher to write these updates directly ' +
       'within this directory?'
-    ].join('\n'));
+    ].join('\n');
 
-    const prompt = new Confirm('Y/n');
+    const prompt = new Confirm({
+      type: 'confirm',
+      message: msg
+    });
     prompt.run().then(answer => {
       // Denied.
       if (!answer) { res.sendStatus(403); }
